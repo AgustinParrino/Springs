@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<h:html xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
+        xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>mi pagina web</title>
+        <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css"/>
+    </h:head>
+    <h:body>
+        <div class="card">
+            <h:form id="forma-clientes">
+                <p:growl id="mensajes" showDetails="true"/> <!-- nos va a permitir mostrar los mensajes-->
+                <!-- Menubar -->
+                <div class="card">
+                    <p:menubar>
+                        <p:menuitem value="Inicio" icon="pi pi-fw pi-user"
+                                    update=":forma-clientes:clientes-tabla"
+                                    actionListener="#{indexControlador.cargarDatos}"/> <!-- vamos a actualizar los datos cuando se toque el icono del usuario-->
+                        <p:menuitem value="Nuevo Cliente" icon="pi pi-fw pi-plus"
+                                    actionListener="#{indexControlador.agregarCliente}"
+                                    update=":forma-modal:cliente-ventana"
+                                    oncomplete="PF('ventanaModalCliente').show()"/> <!--   va a mostrar ina nueva ventana  -->
+                        <!--   Oncomplete es que cuando se complete En Springface llamamos a un componente  para mostrar algo (Por eso el .show ) -->
+
+                    </p:menubar>
+                </div>
+                <!-- DataTable   -->
+                <div class="card">
+                    <p:dataTable value="#{indexControlador.clientes}" var="cliente"
+                                 id="clientes-tabla"
+                                 widgetVar="clientesTabla"> <!-- recorrer todos los objetos de tipo cliente y sus atributos-->
+                        <!-- widgetVar  es para nombtar una variable pero en java -->
+                        <f:facet name="header">
+                            <div class="flex justify-content-center flex-wrap
+                                    card-container yellow-container"> <!-- Centra un cuadro Amarillo en el centro -->
+                                <div class="flex align-items-center
+                                justify-content-center
+                                w-20rem h-4rem bg-yellow-500 font-bold
+                                text-gray-900 border-round m-2">
+                                    <h3>Inicio de la app</h3>
+                                    <!-- Centra el texto dentro del container le da una weight y height de tamaño , fuentes ,bordes-->
+                                </div>
+                            </div>
+                        </f:facet>
+
+                        <p:column headerText="Id">
+                            <h:outputText value="#{cliente.id}"/>
+                        </p:column>                  <!-- muestra de ID en la pagina principal   -->
+
+
+                        <p:column headerText="Nombre">
+                            <h:outputText value="#{cliente.nombre}"/>
+                        </p:column> <!--  Muestra de Nombre  -->
+                        <p:column headerText="Apellido">
+                            <h:outputText value="#{cliente.apellido}"/>
+                        </p:column><!-- Muestra de apellido   -->
+                        <p:column headerText="Numero">
+                            <h:outputText value="#{cliente.numero}"/>
+                        </p:column><!--  Muestra de numero en pagina  -->
+
+                        <p:column>
+                            <p:commandButton value="Editar" icon="pi pi-pencil"
+                                             update=":forma-modal:cliente-ventana"
+                                             process="@this"
+                                             oncomplete="PF('ventanaModalCliente').show()"
+                                             class="ui-button-primary"
+                                             style="margin-right: .5rem">
+                                <f:setPropertyActionListener value="#{cliente}"
+                                                             target="#{indexControlador.clienteSeleccionado}">
+                                </f:setPropertyActionListener>
+                                <p:resetInput target=":forma-modal:cliente-ventana">
+                                </p:resetInput>
+                            </p:commandButton>
+
+                            <!--ui-button-danger es un color rojo (Nota mental se ve muy raro no utilizan colores con decimales)-->
+                            <p:commandButton value="Eliminar" icon="pi pi-trash"
+                                             styleClass="ui-button-danger"
+                                             process="@this"
+                                             oncomplete="PF('eliminarClienteVentana').show()">
+                                <f:setPropertyActionListener
+                                        value="#{cliente}"
+                                        target="#{indexControlador.clienteSeleccionado}" />
+                            </p:commandButton>
+                            <!--termino mi testeoooooo-->
+                        </p:column>
+
+                    </p:dataTable>
+                </div>
+            </h:form>
+            <h:form id="forma-modal">
+                <!--  el showEffect fade es para que  que tenga un efecto de desvanecimiento  y llamamos el componente ventanamodalCliente  -->
+                <!--  responsive Permite que el diálogo se adapte a diferentes tamaños de pantalla. -->
+                <!--widgetVar="ventanaModalCliente" → Asigna un identificador JavaScript a la ventana modal, permitiendo controlarla mediante código -->
+                <p:dialog header="Detalles Cliente" showEffect="fade"
+                          modal="true" widgetVar="ventanaModalCliente"
+                          responsive="true"> <!---->
+                    <p:outputPanel id="cliente-ventana"
+                                   class="ui-fluid"> <!--para que los elementos se muestren unos tras otros-->
+                        <div class="field">
+                            <p:outputLabel for="nombre">Nombre</p:outputLabel>
+                            <p:inputText id="nombre"
+                                         value="#{indexControlador.clienteSeleccionado.nombre}"
+                                         required="true"/> <!--cuando salga el cartel nos va a pedir Nombre y que es requerido-->
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="apellido">Apellido</p:outputLabel>
+                            <p:inputText id="apellido"
+                                         value="#{indexControlador.clienteSeleccionado.apellido}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="numero">Numero</p:outputLabel>
+                            <p:inputNumber id="numero"
+                                           value="#{indexControlador.clienteSeleccionado.numero}"
+                                           required="true"/>
+
+
+                        </div>
+                    </p:outputPanel>
+                    <f:facet name="footer"> <!--pie de pagina-->
+                        <p:commandButton value="Guardar" icon="pi pi-check"
+                                         process="cliente-ventana @this"
+                                         actionListener="#{indexControlador.guardarCliente}"/>  <!--el this es para obtener todos los datos-->
+                        <p:commandButton value="Cancelar" icon="pi pi-times"
+                                         onclick="PF('ventanaModalCliente').hide()"
+                                         class="ui-button-secondary"
+                                         type="button"/> <!--lo que nos muestra el onclick . hide es que va a cerrar la ventana modal Cliente-->
+                    </f:facet>
+                </p:dialog>
+
+                <p:confirmDialog widgetVar ="eliminarClienteVentana"
+                                 showEffect="fade" width="400"
+                                 message="Eliminar Cliente?"
+                                 header="confirmar" severity="warn">
+                    <p:commandButton  value="Si" icon="pi pi-check"
+                                      process="@this"
+                                      actionListener="#{indexControlador.eliminarCliente}"
+                                      oncomplete="PF('eliminarClienteVentana').hide()">
+                    </p:commandButton>
+
+                    <p:commandButton value="No" type="button"
+                                     styleClass="ui-button-secondary"
+                                     icon="pi pi-times"
+                                     onclick="PF('eliminarClienteVentana').hide()">
+
+                    </p:commandButton>
+
+                </p:confirmDialog>
+            </h:form>
+
+        </div>
+    </h:body>
+</h:html>
